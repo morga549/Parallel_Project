@@ -1,1 +1,2 @@
 https://praw.readthedocs.io/en/latest/getting_started/quick_start.html
+Put this in the command line to set encoding to UTF-8, (especially if you receive this error 'charmap' codec can't encode character '\u2019'): chcp 65001
