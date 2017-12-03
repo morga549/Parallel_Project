@@ -1,0 +1,10 @@
+5 Thanks for the heads-up. Fixed.
+3 Could be a side-effect of the new `c.firsttime`-based intro bar on the front page?
+1 Strange, I'm not seeing this on comment pages. Which address did you load to get this?
+-2 Hello - I found this link in fundraising .  Can you help?
+3 Thanks for the ridiculously quick response.<3 from the Google Analytics Social Data Hub team.
+5 Good call. Sounds like PaneStack's json template. Looking into it.Edit: rolling out the fix.
+1 We seem to be hitting http://www.reddit.com/comments.json?before=&limit=100But hitting that with my browser, I don't see anything odd about it.EDIT: But that "{}" string definitely shows up in what the program is trying to parse.
+5 You break it, you fix it. ;)
+2 It'd only show up when you're in a cookie-less first-run scenario. This should be fixed in a couple minutes.
+1 That'd do it. We don't use cookies for requests in the program, but of course my browser would use those.Thanks!  =D
