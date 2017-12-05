@@ -5,7 +5,8 @@ import json
 
 outfile = sys.argv[1] # file to print output to
 sub = sys.argv[2] #subreddit to pull from
-numPosts = sys.argv[2]
+numPosts = int(sys.argv[3])
+print(numPosts)
 
 reddit = praw.Reddit(client_id='BvQLViitNTyU6A',
                      client_secret='IgYF_uDdUYH2Jl8tpY9UFuCf1yY',
@@ -16,12 +17,12 @@ sub = reddit.subreddit(sub)
 
 outfile = open(outfile, 'w')
 
-for post in sub.hot(limit=None): #every post that we can get from this request
+for post in sub.hot(limit = numPosts): #every post that we can get from this request
     post.comments.replace_more(limit=None) # getting rid of MoreComments objects
     for comment in post.comments.list(): # every comment in the flattened comment tree
         if isinstance(comment, Comment):
             karma = comment.score
-            output = comment.body.encode('utf-8')
+            output = comment.body.encode('utf-8').replace('\n', '')
             outfile.write(str(karma) + " " + output + "\n")
 
 # **debugging**
