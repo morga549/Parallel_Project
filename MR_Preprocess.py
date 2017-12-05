@@ -22,7 +22,7 @@ for post in sub.hot(limit = numPosts): #every post that we can get from this req
     for comment in post.comments.list(): # every comment in the flattened comment tree
         if isinstance(comment, Comment):
             karma = comment.score
-            output = comment.body.encode('utf-8').replace('\n', '')
+            output = comment.body.encode('utf-8').replace('\n', '').replace('\t', '')
             outfile.write(str(karma) + " " + output + "\n")
 
 # **debugging**
