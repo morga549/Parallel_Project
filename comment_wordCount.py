@@ -3,15 +3,21 @@ from collections import Counter
 from collections import defaultdict
 import json
 import sys
+import statistics as s
 
 outfile = sys.argv[1] # file to print output to
-sub = sys.argv[2] #subreddit to pull from
+sub = sys.argv[2] # subreddit to pull from
+numPosts = int(sys.argv[3]) # number of posts to scrape]
+print(numPosts)
 
 
 # seach terms
 redditisms = ['FTFY', 'IMO', 'DAE', 'ELI5', 'IMHO', 'TIL', 'IIRC', 'ITT', 'TLDR',
             'TL;DR','MIC', 'MFW', 'SMH', 'MRW', 'AFAIK', 'AMA', 'FFS', 'NFSW', 'NSFL',
             'TIFU', 'OP', '/S', 'SJW', 'NECKBEARD', 'KARMAWHORE', 'SHITPOST', 'CIRCLEJERK']
+
+dataDict = {key: [] for key in redditisms}
+
 
 # unauthorized reddit instance
 reddit = praw.Reddit(client_id='BvQLViitNTyU6A',
@@ -42,16 +48,30 @@ def commentSearch(comment, outfile):
     words = comment.body.encode('utf-8').upper().split()
 
     output = set(words).intersection(redditisms)
-    for word in output:
-        outfile.write(word + " " + str(karma) + "\n")
 
+    for word in output:
+        outfile.write(str(karma) + " " + word)
+
+def commentSearch(comment):
+
+    karma = comment.score
+    words = comment.body.encode('utf-8').upper().split()
+
+    output = set(words).intersection(redditisms)
+
+    for word in output:
+        dataDict[word].append(karma)
 
 outfile = open(outfile, 'a')
 
-for post in sub.hot(limit=200): #every post that we can get from this request
+for post in sub.hot(limit = numPosts): #every post that we can get from this request
     print(post.title + "\n")
     post.comments.replace_more(limit=None) # getting rid of MoreComments objects
     for comment in post.comments.list(): # every comment in the flattened comment tree
-        commentSearch(comment, outfile)
+        commentSearch(comment)
+
+for k, v in dataDict.items():
+    if(v):
+        outfile.write(k + " " + str(s.mean(v)) + '\n')
 
 outfile.close()
