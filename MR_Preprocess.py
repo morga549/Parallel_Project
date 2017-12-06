@@ -32,6 +32,6 @@ for post in sub.hot(limit = numPosts): #every post that we can get from this req
 #     if isinstance(comment, Comment):
 #         karma = comment.score
 #         output = comment.body.encode('utf-8').replace('\n', '')
-#         outfile.write(output + " " + str(karma) +  "\n")
+#         outfile.write(str(karma) + " " + output + "\n")
 # **debugging**
 outfile.close()
