@@ -30,7 +30,7 @@ public class RedditismKarmaCollector {
 
         public void map(LongWritable key, Text value, Context context
         ) throws IOException, InterruptedException {
-            List<String> lList = new LinkedList<String>(Arrays.asList(value.toString().split(" ")));
+            List<String> lList = new LinkedList<String>(Arrays.asList(value.toString().toUpperCase().split(" ")));
             int karma = Integer.parseInt(lList.get(0));
             lList.remove(0);
             Set<String> line = new HashSet(lList);
