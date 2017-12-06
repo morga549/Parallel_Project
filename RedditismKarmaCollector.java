@@ -1,10 +1,15 @@
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.List;
+import java.lang.Integer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -15,22 +20,21 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class RedditismKarmaCollector {
 
     public static class RKCMapper
-    extends Mapper<Text, Text, Text, IntWritable>{
-        String[] keyWords = ["FTFY", "IMO", "DAE", "ELI5", "IMHO", "TIL", "IIRC", "ITT", "TLDR",
+    extends Mapper<LongWritable, Text, Text, IntWritable>{
+        String[] keyWords = {"FTFY", "IMO", "DAE", "ELI5", "IMHO", "TIL", "IIRC", "ITT", "TLDR",
                     "TL;DR","MIC", "MFW", "SMH", "MRW", "AFAIK", "AMA", "FFS", "NFSW", "NSFL",
-                    "TIFU", "OP", "/S", "SJW", "NECKBEARD", "KARMAWHORE", "SHITPOST", "CIRCLEJERK"]
+                    "TIFU", "OP", "/S", "SJW", "NECKBEARD", "KARMAWHORE", "SHITPOST", "CIRCLEJERK"};
 
-        Set<String> redditisms = new HashSet<String>(keyWords);
+        Set<String> redditisms = new HashSet<String>(Arrays.asList(keyWords));
 
-        public void map(Text key, Text value, Context context
+        public void map(LongWritable key, Text value, Context context
         ) throws IOException, InterruptedException {
-            List<String> aList = value.toString().split(" ").asList();
-            int lastIdx = aList.size() - 1;
-            int karma = Interger.parseInt(aList.get(lastIdx));
-            aList.remove(lastIdx);
-            Set<String> line = new HashSet(aList);
+            List<String> lList = new LinkedList<String>(Arrays.asList(value.toString().split(" ")));
+            int karma = Integer.parseInt(lList.get(0));
+            lList.remove(0);
+            Set<String> line = new HashSet(lList);
 
-            line = line.retainAll(redditisms);
+            line.retainAll(redditisms);
 
             for(String word: line){
                 context.write(new Text(word), new IntWritable(karma));
@@ -39,13 +43,13 @@ public class RedditismKarmaCollector {
     }
 
     public static class RKCReducer
-    extends Reducer<Text,IntWritable,Text,F> {
+    extends Reducer<Text,IntWritable,Text,IntWritable> {
         private IntWritable result = new IntWritable();
 
         public void reduce(Text key, Iterable<IntWritable> values,
         Context context
         ) throws IOException, InterruptedException {
-            for(Text value : values){
+            for(IntWritable value : values){
                 context.write(key, value);
             }
         }
@@ -53,14 +57,16 @@ public class RedditismKarmaCollector {
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
-        Job job = Job.getInstance(conf, "common friends");
-        job.setJarByClass(CommonFriends.class);
-        job.setMapperClass(CFMapper.class);
-        //job.setCombinerClass(IntSumReducer.class);
-        job.setReducerClass(CFReducer.class);
+        Job job = Job.getInstance(conf, "redditism average karma");
+        job.setJarByClass(RedditismKarmaCollector.class);
+        job.setMapperClass(RKCMapper.class);
+        //job.setCombinerClass(RKCReducer.class);
+        job.setReducerClass(RKCReducer.class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(IntWritable.class);
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
-        FileInputFormat.addInputPath(job, new Path(args[0]));
+	job.setOutputValueClass(IntWritable.class);
+	FileInputFormat.addInputPath(job, new Path(args[0]));
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
